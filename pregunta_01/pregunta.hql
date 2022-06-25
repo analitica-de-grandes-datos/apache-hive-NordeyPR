@@ -14,29 +14,24 @@ Escriba el resultado a la carpeta `output` de directorio de trabajo.
         >>> Escriba su respuesta a partir de este punto <<<
 */
 
-DROP TABLE IF EXISTS data;
-DROP TABLE IF EXISTS result;
-CREATE TABLE data (line STRING);
-CREATE TABLE result(letter STRING, value int);
-LOAD DATA LOCAL INPATH "data.tsv" OVERWRITE INTO TABLE data;
-SELECT * FROM data LIMIT 5;
-SELECT explode(split(line, '\\s')) AS word FROM data;
+DROP TABLE IF EXISTS letters;
+DROP TABLE IF EXISTS letters_counts;
 
-INSERT INTO result
-SELECT letter, count(letter) AS value
+CREATE TABLE letters (col1 STRING, col2 STRING, col3 INT)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
+
+LOAD DATA LOCAL INPATH 'data.tsv' OVERWRITE INTO TABLE letters;
+
+CREATE TABLE letters_counts
+AS
+    SELECT letter, count(1) AS count
     FROM
-        (SELECT split(line, '\\s')[0] AS letter FROM data) C1
+        (SELECT col1 AS letter FROM letters) w
 GROUP BY
     letter
 ORDER BY
     letter;
 
-Select * from result;
-
-Select CONCAT('"',letter,',',value,'"') as Rtaprofe from result;
-
-Select CONCAT('[', (Select CONCAT('"',letter,',',value,'"') as Rtaprofe from result),']') 
-from result limit 1;
-
-hive -S -e 'Select CONCAT(''"'',letter,'','',value,''"'') as Rtaprofe from result;' > output/result.csv
-
+INSERT OVERWRITE LOCAL DIRECTORY './output'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+SELECT * FROM letters_counts;
