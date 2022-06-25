@@ -18,7 +18,7 @@ DROP TABLE IF EXISTS data;
 DROP TABLE IF EXISTS result;
 CREATE TABLE data (line STRING);
 CREATE TABLE result(letter STRING, value int);
-LOAD DATA LOCAL INPATH "pregunta_01/Source/" OVERWRITE INTO TABLE data;
+LOAD DATA LOCAL INPATH "data.tsv" OVERWRITE INTO TABLE data;
 SELECT * FROM data LIMIT 5;
 SELECT explode(split(line, '\\s')) AS word FROM data;
 
