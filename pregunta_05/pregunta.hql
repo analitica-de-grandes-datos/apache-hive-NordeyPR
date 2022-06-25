@@ -44,29 +44,19 @@ LOAD DATA LOCAL INPATH 'data1.csv' INTO TABLE tbl1;
 /*
     >>> Escriba su respuesta a partir de este punto <<<
 */
+DROP TABLE IF EXISTS salida;
+DROP TABLE IF EXISTS intermedio;
 
-ROW FORMAT DELIMITED 
-FIELDS TERMINATED BY ','
-COLLECTION ITEMS TERMINATED BY ':'
-MAP KEYS TERMINATED BY '#'
-LINES TERMINATED BY '\n';
+CREATE TABLE intermedio AS
+SELECT date_format(c4,'YYYY') AS year, c5_explode FROM tbl0
+LATERAL VIEW explode(c5) tbl0 AS c5_explode
+ORDER BY year;
 
-DROP TABLE IF EXISTS tbl0;
-CREATE TABLE tbl0 (
-    c1 INT,
-    c2 STRING,
-    c3 INT,
-    c4 DATE,
-    c5 ARRAY<CHAR(1)>, 
-    c6 MAP<STRING, INT>
-)
-ROW FORMAT DELIMITED 
-FIELDS TERMINATED BY ','
-COLLECTION ITEMS TERMINATED BY ':'
-MAP KEYS TERMINATED BY '#'
-LINES TERMINATED BY '\n';
-LOAD DATA LOCAL INPATH 'pregunta_04/SOURCE/data0.csv' INTO TABLE tbl0;
-SELECT z.anio, z.letra, count(z.letra) from (
-SELECT YEAR(P.C4) AS anio,letra FROM tbl0 P
-LATERAL VIEW EXPLODE(P.c5) fv as letra) as z
-GROUP BY z.anio, z.letra;
+CREATE TABLE salida AS
+SELECT year, c5_explode, count(1) AS count
+FROM intermedio
+GROUP BY year, c5_explode;
+
+INSERT OVERWRITE LOCAL DIRECTORY './output'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+SELECT * FROM salida;
