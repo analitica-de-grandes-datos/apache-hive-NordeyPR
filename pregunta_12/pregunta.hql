@@ -44,7 +44,7 @@ CREATE TABLE t0 (
         COLLECTION ITEMS TERMINATED BY ','
         MAP KEYS TERMINATED BY '#'
         LINES TERMINATED BY '\n';
-LOAD DATA LOCAL INPATH 'pregunta_12/SOURCE/data.tsv' INTO TABLE t0;
+LOAD DATA LOCAL INPATH 'data.tsv' INTO TABLE t0;
 
 SELECT c2, c3 from t0;
 SELECT c2, map_keys(c3) from t0;
