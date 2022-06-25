@@ -46,26 +46,21 @@ LOAD DATA LOCAL INPATH 'data1.csv' INTO TABLE tbl1;
     >>> Escriba su respuesta a partir de este punto <<<
 */
 
-ROW FORMAT DELIMITED 
-FIELDS TERMINATED BY ','
-COLLECTION ITEMS TERMINATED BY ':'
-MAP KEYS TERMINATED BY '#'
-LINES TERMINATED BY '\n';
+DROP TABLE IF EXISTS salida;
+DROP TABLE IF EXISTS intermedio;
 
-DROP TABLE IF EXISTS tbl0;
-CREATE TABLE tbl0 (
-    c1 INT,
-    c2 STRING,
-    c3 INT,
-    c4 DATE,
-    c5 ARRAY<CHAR(1)>, 
-    c6 MAP<STRING, INT>
-)
-ROW FORMAT DELIMITED 
-FIELDS TERMINATED BY ','
-COLLECTION ITEMS TERMINATED BY ':'
-MAP KEYS TERMINATED BY '#'
-LINES TERMINATED BY '\n';
-LOAD DATA LOCAL INPATH 'pregunta_04/SOURCE/data0.csv' INTO TABLE tbl0;
+CREATE TABLE salida
+AS
+SELECT 
+    c1, 
+    concat_ws(':',collect_list(upper(exploded))) AS elementos
+FROM 
+    tbl0 
+LATERAL VIEW 
+    explode(c5) tbl0 AS exploded
+GROUP BY c1;
 
-SELECT CONCAT('"',UPPER(CONCAT_WS(':',c5)),'",') FROM tbl0;
+
+INSERT OVERWRITE LOCAL DIRECTORY './output'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+SELECT elementos FROM salida;
