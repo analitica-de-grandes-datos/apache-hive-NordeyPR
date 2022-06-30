@@ -42,4 +42,4 @@ LATERAL VIEW
     EXPLODE(c3) t0 AS letters, nums
 LATERAL VIEW
     EXPLODE(c2) t0 AS lets
-GROUP BY lets, letters;
+GROUP BY lets, letters
